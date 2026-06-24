@@ -51,7 +51,9 @@ export function PartnerLogo({ id, title, logo, className }: PartnerLogoProps) {
 }
 
 const MARKS: Record<ParceiroId, JSX.Element> = {
-  // ── Allianz: wordmark azul-escuro + 3 barras no octógono ──────────────
+  // ── Allianz: wordmark azul-escuro + 3 barras crescentes ───────────────
+  //  Marca real: três traços verticais, altura crescente da esquerda p/ a
+  //  direita, mesma cor do texto (#003781). Sem container.
   allianz: (
     <g>
       <text
@@ -65,11 +67,10 @@ const MARKS: Record<ParceiroId, JSX.Element> = {
       >
         Allianz
       </text>
-      <g transform="translate(132 12)">
-        <circle cx="16" cy="16" r="16" fill="#003781" />
-        <rect x="9" y="14" width="3" height="11" fill="#fff" />
-        <rect x="14.5" y="9" width="3" height="16" fill="#fff" />
-        <rect x="20" y="11.5" width="3" height="13.5" fill="#fff" />
+      <g transform="translate(140 0)" fill="#003781">
+        <rect x="0" y="34" width="4" height="14" rx="1" />
+        <rect x="9" y="26" width="4" height="22" rx="1" />
+        <rect x="18" y="14" width="4" height="34" rx="1" />
       </g>
     </g>
   ),
@@ -107,13 +108,19 @@ const MARKS: Record<ParceiroId, JSX.Element> = {
     </g>
   ),
 
-  // ── Bradesco Seguros: símbolo + "bradesco" + "seguros" ────────────────
+  // ── Bradesco Seguros: símbolo (árvore) + "bradesco" + "seguros" ───────
+  //  Marca real: árvore estilizada — tronco curto + copa em chamas/folhas
+  //  ascendentes. Recriada simétrica em #CC092F.
   bradesco: (
     <g>
-      <path
-        d="M14 6 C9 12 8 20 12 27 C9 22 11 14 16 11 C13 16 14 22 18 26 C21 18 19 11 14 6 Z"
-        fill="#CC092F"
-      />
+      <g fill="#CC092F" transform="translate(2 4)">
+        {/* tronco */}
+        <path d="M11.5 30 L11.5 21 L14.5 21 L14.5 30 Z" />
+        {/* copa: três "folhas" ascendentes */}
+        <path d="M13 4 C9 10 9 16 13 22 C17 16 17 10 13 4 Z" />
+        <path d="M6 12 C6 18 9 21 13 22 C11 17 9 14 6 12 Z" />
+        <path d="M20 12 C20 18 17 21 13 22 C15 17 17 14 20 12 Z" />
+      </g>
       <text
         x="30"
         y="30"
@@ -165,28 +172,20 @@ const MARKS: Record<ParceiroId, JSX.Element> = {
     </g>
   ),
 
-  // ── MAPFRE: cogumelo + wordmark vermelho ──────────────────────────────
+  // ── MAPFRE: wordmark vermelho (logo moderno é tipográfico, sem símbolo) ─
   mapfre: (
-    <g transform="translate(0 4)">
-      <g transform="translate(4 8)">
-        <ellipse cx="13" cy="11" rx="13" ry="9" fill="#D81E2C" />
-        <rect x="10" y="18" width="6" height="10" rx="2" fill="#D81E2C" />
-        <circle cx="8" cy="9" r="2.2" fill="#fff" />
-        <circle cx="15" cy="7" r="1.8" fill="#fff" />
-        <circle cx="19" cy="11" r="1.6" fill="#fff" />
-      </g>
-      <text
-        x="38"
-        y="35"
-        fontFamily="Arial, Helvetica, sans-serif"
-        fontWeight="800"
-        fontSize="28"
-        letterSpacing="1"
-        fill="#D81E2C"
-      >
-        MAPFRE
-      </text>
-    </g>
+    <text
+      x="100"
+      y="37"
+      textAnchor="middle"
+      fontFamily="Arial, Helvetica, sans-serif"
+      fontWeight="800"
+      fontSize="30"
+      letterSpacing="1.5"
+      fill="#D81E2C"
+    >
+      MAPFRE
+    </text>
   ),
 
   // ── Porto Seguro: "PORTO SEGURO" azul + vela ──────────────────────────
