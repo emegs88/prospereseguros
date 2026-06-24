@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Design tokens (HSL) consumidos pelo tailwind.config.ts.
+   Tema claro por padrão; .dark inverte para superfícies escuras.
+   ───────────────────────────────────────────────────────────────────────── */
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 217 100% 37%; /* prospere-blue */
+
+    --radius: 1rem;
+  }
+
+  .dark {
+    --background: 213 64% 10%; /* navy */
+    --foreground: 210 40% 98%;
+
+    --card: 215 38% 14%;
+    --card-foreground: 210 40% 98%;
+
+    --muted: 215 28% 20%;
+    --muted-foreground: 217 19% 70%;
+
+    --border: 215 28% 22%;
+    --input: 215 28% 22%;
+    --ring: 220 73% 49%; /* prospere-glow */
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Seleção com a cor da marca */
+  ::selection {
+    background: rgba(0, 71, 186, 0.18);
+  }
+
+  /* Scrollbar discreta */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 71, 186, 0.25);
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 71, 186, 0.4);
+  }
+}
+
+@layer utilities {
+  /* Texto com gradiente da marca (títulos de destaque) */
+  .text-gradient-prospere {
+    background-image: linear-gradient(90deg, #0047ba 0%, #1e5fd9 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* Brilho radial usado nos heros escuros */
+  .bg-glow-prospere {
+    background-image:
+      radial-gradient(60% 60% at 50% 0%, rgba(30, 95, 217, 0.25) 0%, transparent 70%),
+      radial-gradient(40% 40% at 100% 100%, rgba(0, 71, 186, 0.18) 0%, transparent 70%);
+  }
+
+  /* Faixa animada (marquee) para a régua de parceiros */
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .animate-marquee {
+    animation: marquee 28s linear infinite;
+  }
+  .pause-on-hover:hover .animate-marquee {
+    animation-play-state: paused;
+  }
+
+  /* Sutil “rise in” para entradas */
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-rise {
+    animation: rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+}

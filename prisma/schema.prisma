@@ -1,0 +1,323 @@
+// ─────────────────────────────────────────────────────────────────────────
+//  PROSPERE CORRETORA DE SEGUROS — Schema de dados
+//  CNPJ 67.212.573/0001-50
+//  Modelagem do funil: Lead → Cotacao → Proposta → Apolice → Sinistro
+// ─────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+enum Ramo {
+  AUTO
+  MOTO
+  VIDA
+  RESIDENCIAL
+  VIAGEM
+  CELULAR
+  EMPRESARIAL
+  PET
+}
+
+enum CotacaoStatus {
+  RASCUNHO // quick quote salvo, ainda incompleto
+  PROCESSANDO // multicálculo em execução
+  CONCLUIDA // resultados disponíveis
+  EXPIRADA
+}
+
+enum CotacaoSeguradoraStatus {
+  PENDENTE
+  COTADO
+  INDISPONIVEL // connector falhou ou recusou risco
+}
+
+enum PropostaStatus {
+  CRIADA
+  AGUARDANDO_PAGAMENTO
+  PAGA
+  EM_EMISSAO
+  EMITIDA
+  RECUSADA
+  CANCELADA
+}
+
+enum ApoliceStatus {
+  ATIVA
+  VENCIDA
+  CANCELADA
+  RENOVANDO
+}
+
+enum SinistroStatus {
+  ABERTO
+  EM_ANALISE
+  DOCUMENTACAO_PENDENTE
+  APROVADO
+  NEGADO
+  PAGO
+}
+
+// ── Cliente / Auth ──────────────────────────────────────────────────────────
+
+model Cliente {
+  id            String   @id @default(cuid())
+  nome          String
+  email         String   @unique
+  telefone      String?
+  // CPF criptografado em repouso (ver lib/crypto.ts). NUNCA em texto puro.
+  cpfCriptografado String?
+  senhaHash     String?  // null quando usa apenas magic link
+  emailVerificado Boolean @default(false)
+  consentimentoLgpd Boolean @default(false)
+  consentimentoEm   DateTime?
+
+  cotacoes  Cotacao[]
+  propostas Proposta[]
+  apolices  Apolice[]
+  sinistros Sinistro[]
+  avaliacoes Avaliacao[]
+  magicLinks MagicLink[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("clientes")
+}
+
+model MagicLink {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  expiraEm  DateTime
+  usadoEm   DateTime?
+  criadoEm  DateTime @default(now())
+
+  @@map("magic_links")
+}
+
+// ── Lead (capturado antes do WhatsApp / antes do login) ──────────────────────
+
+model Lead {
+  id        String  @id @default(cuid())
+  nome      String?
+  telefone  String?
+  email     String?
+  ramo      Ramo
+  origem    String? // "comparador", "whatsapp_cta", "quick_quote", "ia_chat"
+  // payload livre com o contexto capturado no momento (placa, cep, etc.)
+  contexto  Json?
+  // referência opcional à cotação que gerou o lead
+  cotacaoId String?
+  cotacao   Cotacao? @relation(fields: [cotacaoId], references: [id])
+
+  criadoEm DateTime @default(now())
+
+  @@index([ramo])
+  @@index([criadoEm])
+  @@map("leads")
+}
+
+// ── Cotação (multicálculo) ───────────────────────────────────────────────────
+
+model Cotacao {
+  id        String        @id @default(cuid())
+  // código amigável exibido ao cliente: PRO-4821
+  codigo    String        @unique
+  ramo      Ramo
+  status    CotacaoStatus @default(RASCUNHO)
+
+  clienteId String?
+  cliente   Cliente? @relation(fields: [clienteId], references: [id])
+
+  // dados de entrada normalizados (placa, FIPE, perfil, coberturas...)
+  payload   Json
+
+  resultados CotacaoSeguradora[]
+  leads      Lead[]
+  proposta   Proposta?
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+  expiraEm     DateTime?
+
+  @@index([codigo])
+  @@index([ramo, status])
+  @@map("cotacoes")
+}
+
+// resultado de UMA seguradora dentro de uma cotação
+model CotacaoSeguradora {
+  id          String                  @id @default(cuid())
+  cotacaoId   String
+  cotacao     Cotacao                 @relation(fields: [cotacaoId], references: [id], onDelete: Cascade)
+
+  seguradoraId   String // "porto", "bradesco"...
+  seguradoraNome String
+  logoUrl        String?
+
+  status     CotacaoSeguradoraStatus @default(PENDENTE)
+  motivoIndisponivel String?
+
+  precoAnual  Decimal? @db.Decimal(10, 2)
+  precoMensal Decimal? @db.Decimal(10, 2)
+  franquia    Decimal? @db.Decimal(10, 2)
+  assistencia24h Boolean @default(false)
+  carenciaDias   Int?
+  notaAvaliacao  Decimal? @db.Decimal(2, 1)
+  // metadados extras retornados pelo connector
+  metadados   Json?
+
+  coberturas Cobertura[]
+
+  criadoEm DateTime @default(now())
+
+  @@index([cotacaoId])
+  @@map("cotacao_seguradoras")
+}
+
+model Cobertura {
+  id                  String @id @default(cuid())
+  cotacaoSeguradoraId String
+  cotacaoSeguradora   CotacaoSeguradora @relation(fields: [cotacaoSeguradoraId], references: [id], onDelete: Cascade)
+
+  chave     String // "casco", "rcf_danos_materiais", "app_morte"...
+  rotulo    String // "Colisão e roubo"
+  incluida  Boolean @default(true)
+  // valor de cobertura (limite). null quando boolean (apenas incluída/não)
+  valor     Decimal? @db.Decimal(12, 2)
+  descricao String?
+
+  @@index([cotacaoSeguradoraId])
+  @@map("coberturas")
+}
+
+// ── Proposta (cliente escolheu uma oferta) ───────────────────────────────────
+
+model Proposta {
+  id        String         @id @default(cuid())
+  codigo    String         @unique
+  status    PropostaStatus @default(CRIADA)
+
+  cotacaoId String  @unique
+  cotacao   Cotacao @relation(fields: [cotacaoId], references: [id])
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  seguradoraId   String
+  seguradoraNome String
+  precoAnual     Decimal @db.Decimal(10, 2)
+  precoMensal    Decimal @db.Decimal(10, 2)
+
+  // referência de pagamento (token do gateway). NUNCA dados de cartão.
+  pagamentoRef   String?
+  pagamentoProvider String?
+
+  apolice   Apolice?
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@map("propostas")
+}
+
+// ── Apólice (emitida) ────────────────────────────────────────────────────────
+
+model Apolice {
+  id        String        @id @default(cuid())
+  numero    String        @unique
+  status    ApoliceStatus @default(ATIVA)
+  ramo      Ramo
+
+  propostaId String   @unique
+  proposta   Proposta @relation(fields: [propostaId], references: [id])
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  seguradoraId   String
+  seguradoraNome String
+  precoAnual     Decimal @db.Decimal(10, 2)
+
+  vigenciaInicio DateTime
+  vigenciaFim    DateTime
+  documentoUrl   String? // PDF da apólice
+
+  sinistros Sinistro[]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([status])
+  @@map("apolices")
+}
+
+// ── Sinistro ─────────────────────────────────────────────────────────────────
+
+model Sinistro {
+  id        String         @id @default(cuid())
+  protocolo String         @unique
+  status    SinistroStatus @default(ABERTO)
+
+  apoliceId String
+  apolice   Apolice @relation(fields: [apoliceId], references: [id])
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  tipo        String // "colisao", "roubo", "vidros"...
+  descricao   String
+  ocorridoEm  DateTime
+  documentos  Json? // [{ url, tipo, nome }]
+
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([clienteId])
+  @@map("sinistros")
+}
+
+// ── Avaliações / prova social ────────────────────────────────────────────────
+
+model Avaliacao {
+  id        String  @id @default(cuid())
+  clienteId String?
+  cliente   Cliente? @relation(fields: [clienteId], references: [id])
+
+  nomeExibicao String
+  ramo         Ramo?
+  nota         Int // 1..5
+  comentario   String
+  aprovada     Boolean @default(false) // moderação antes de exibir
+  cidade       String?
+
+  criadoEm DateTime @default(now())
+
+  @@index([aprovada])
+  @@map("avaliacoes")
+}
+
+// ── Trilha de auditoria (compliance) ─────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  entidade  String // "cotacao", "proposta", "apolice"
+  entidadeId String
+  acao      String // "criada", "recalculada", "emitida"...
+  ator      String? // clienteId ou "sistema"
+  detalhes  Json?
+  criadoEm  DateTime @default(now())
+
+  @@index([entidade, entidadeId])
+  @@map("audit_logs")
+}

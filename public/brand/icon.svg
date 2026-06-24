@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Prospere Seguros">
+  <rect width="120" height="120" rx="26" fill="#0047BA"/>
+  <!-- "P" branco geométrico -->
+  <path d="M38 26 H72 a26 26 0 0 1 0 52 H54 v16 H38 Z M54 42 v20 h16 a10 10 0 0 0 0-20 Z" fill="#FFFFFF"/>
+  <!-- swoosh esportivo -->
+  <path d="M22 98 C46 64 86 44 104 46 C92 56 74 60 60 70 C44 80 34 90 30 98 Z" fill="#FFFFFF" opacity="0.92"/>
+</svg>
