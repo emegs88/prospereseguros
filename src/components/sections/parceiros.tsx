@@ -23,6 +23,7 @@ export function Parceiros() {
               key={p.id}
               id={p.id}
               title={p.nome}
+              logo={p.logo}
               className="h-10 w-auto opacity-90 grayscale transition-all duration-300 hover:-translate-y-0.5 hover:opacity-100 hover:grayscale-0"
             />
           ))}
@@ -36,6 +37,7 @@ export function Parceiros() {
                 key={`${p.id}-${i}`}
                 id={p.id}
                 title={p.nome}
+                logo={p.logo}
                 className="h-8 w-auto opacity-90"
               />
             ))}

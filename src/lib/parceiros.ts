@@ -5,10 +5,13 @@
 //  renderizados como SVG vetorial pelo componente <PartnerLogo>, recriando a
 //  cor/estilo de cada marca (sem depender de arquivos de imagem externos).
 //
-//  Para usar os PNG/SVG oficiais das seguradoras no lugar do vetor:
-//    1. Salve o arquivo em /public/seguradoras/<id>.svg
-//    2. Em <PartnerLogo> troque o render do <id> por <img src={...}>
-//  (ver docs/INTEGRACAO.md)
+//  COMO DEIXAR OS LOGOS EXATOS (arquivo oficial de cada marca):
+//    1. Salve 1 arquivo POR seguradora, fundo transparente, em
+//       /public/seguradoras/<id>.svg  (ou .png), nomeado pelo `id` abaixo.
+//    2. Marque `logoOficial: true` na marca correspondente (ou informe o
+//       caminho exato em `logo`).
+//    O <PartnerLogo> passa a renderizar o arquivo real automaticamente; quem
+//    não tiver arquivo continua no vetor desenhado. (ver public/seguradoras/README.md)
 // ─────────────────────────────────────────────────────────────────────────
 
 export type ParceiroId =
@@ -26,6 +29,12 @@ export type ParceiroId =
 export interface Parceiro {
   id: ParceiroId;
   nome: string;
+  /**
+   * Caminho do logo OFICIAL (em /public). Se preenchido, o <PartnerLogo>
+   * renderiza este arquivo real em vez do vetor desenhado — fica exato.
+   * Ex.: "/seguradoras/azul.svg"
+   */
+  logo?: string;
 }
 
 export const PARCEIROS: Parceiro[] = [

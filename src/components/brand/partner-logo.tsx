@@ -2,19 +2,41 @@ import { cn } from "@/lib/utils";
 import type { ParceiroId } from "@/lib/parceiros";
 
 // ─────────────────────────────────────────────────────────────────────────
-//  Logos das seguradoras parceiras em SVG vetorial.
-//  Recriação fiel de cor/tipografia de cada marca (uso editorial — corretora
-//  exibindo as seguradoras com que trabalha). Todos com fundo transparente.
-//  Normalizados em viewBox 0 0 200 56 para alinhar na régua de parceiros.
+//  Logos das seguradoras parceiras.
+//
+//  • Se a marca tiver um arquivo OFICIAL (prop `logo`, ex.: "/seguradoras/
+//    azul.svg"), ele é renderizado como <img> — fica 100% exato.
+//  • Caso contrário, cai no vetor desenhado (MARKS), normalizado em
+//    viewBox 0 0 200 56 para alinhar na régua de parceiros.
+//
+//  Assim, basta jogar os arquivos oficiais em /public/seguradoras/ e apontar
+//  `logo` em src/lib/parceiros.ts — sem mexer neste componente.
 // ─────────────────────────────────────────────────────────────────────────
 
 interface PartnerLogoProps {
   id: ParceiroId;
   title: string;
+  /** Caminho do logo oficial em /public. Se informado, usa o arquivo real. */
+  logo?: string;
   className?: string;
 }
 
-export function PartnerLogo({ id, title, className }: PartnerLogoProps) {
+export function PartnerLogo({ id, title, logo, className }: PartnerLogoProps) {
+  // Logo oficial → arquivo real, exato.
+  if (logo) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return (
+      <img
+        src={logo}
+        alt={title}
+        loading="lazy"
+        decoding="async"
+        className={cn("h-9 w-auto object-contain", className)}
+      />
+    );
+  }
+
+  // Sem arquivo oficial → vetor desenhado.
   return (
     <svg
       viewBox="0 0 200 56"
