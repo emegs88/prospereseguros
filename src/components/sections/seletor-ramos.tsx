@@ -14,6 +14,7 @@ import {
 import { PRODUTOS, type Produto } from "@/lib/produtos";
 import { Badge } from "@/components/ui/badge";
 import { whatsappLink } from "@/lib/whatsapp";
+import { Reveal, StaggerGroup, RevealItem } from "@/components/ui/reveal";
 
 const ICONES = {
   Car,
@@ -31,7 +32,7 @@ function ProdutoCard({ produto }: { produto: Produto }) {
   return (
     <Link
       href={produto.href}
-      className="group relative flex flex-col rounded-2xl border border-zinc-200 bg-white p-6 shadow-card transition-all hover:-translate-y-1 hover:border-prospere-blue/40 hover:shadow-glow"
+      className="group relative flex h-full flex-col rounded-2xl border border-zinc-200 bg-white p-6 shadow-card transition-all hover:-translate-y-1 hover:border-prospere-blue/40 hover:shadow-glow"
     >
       {produto.destaque && (
         <Badge variant="gold" className="absolute right-4 top-4">
@@ -61,7 +62,7 @@ function ProdutoCard({ produto }: { produto: Produto }) {
 export function SeletorRamos() {
   return (
     <section id="produtos" className="mx-auto max-w-6xl px-6 py-20">
-      <div className="text-center">
+      <Reveal className="text-center">
         <p className="text-sm font-semibold uppercase tracking-[0.2em] text-prospere-blue">
           Para o que você precisar
         </p>
@@ -72,13 +73,15 @@ export function SeletorRamos() {
           Cote, compare e contrate em minutos — sem burocracia, com atendimento
           humano de quem entende do assunto há mais de 23 anos.
         </p>
-      </div>
+      </Reveal>
 
-      <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <StaggerGroup className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {PRODUTOS.map((p) => (
-          <ProdutoCard key={p.slug} produto={p} />
+          <RevealItem key={p.slug}>
+            <ProdutoCard produto={p} />
+          </RevealItem>
         ))}
-      </div>
+      </StaggerGroup>
 
       {/* todos os tipos de seguro — não só os listados */}
       <div className="mt-8 flex flex-col items-center justify-between gap-4 rounded-2xl border border-dashed border-prospere-blue/30 bg-prospere-blue/5 p-6 text-center sm:flex-row sm:text-left">

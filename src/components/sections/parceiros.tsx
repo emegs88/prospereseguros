@@ -1,12 +1,13 @@
 import { PARCEIROS } from "@/lib/parceiros";
 import { PartnerLogo } from "@/components/brand/partner-logo";
+import { Reveal } from "@/components/ui/reveal";
 
 // Seção "Nossos parceiros" — régua com os logos reais das seguradoras.
 // Em telas pequenas vira um marquee contínuo; no desktop, grade estática.
 export function Parceiros() {
   return (
     <section className="border-y border-zinc-100 bg-white py-14">
-      <div className="mx-auto max-w-6xl px-6">
+      <Reveal className="mx-auto max-w-6xl px-6">
         <p className="text-center font-condensed text-2xl font-extrabold uppercase text-zinc-800 md:text-3xl">
           Nossos <span className="text-prospere-blue">parceiros</span>
         </p>
@@ -22,7 +23,7 @@ export function Parceiros() {
               key={p.id}
               id={p.id}
               title={p.nome}
-              className="h-10 w-auto opacity-90 grayscale transition hover:opacity-100 hover:grayscale-0"
+              className="h-10 w-auto opacity-90 grayscale transition-all duration-300 hover:-translate-y-0.5 hover:opacity-100 hover:grayscale-0"
             />
           ))}
         </div>
@@ -40,7 +41,7 @@ export function Parceiros() {
             ))}
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }
