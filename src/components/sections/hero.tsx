@@ -218,7 +218,7 @@ export function Hero() {
           </motion.div>
 
           {/* números (count-up) abaixo do mockup */}
-          <div className="mt-6 grid grid-cols-4 gap-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {NUMEROS.map((n) => (
               <div
                 key={n.rotulo}

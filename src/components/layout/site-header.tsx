@@ -36,8 +36,8 @@ export function SiteHeader() {
 
   return (
     <header
-      className={`sticky top-0 z-40 transition-all duration-300 ${
-        scrolled
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled || aberto
           ? "border-b border-zinc-200 bg-white/90 backdrop-blur"
           : "bg-transparent"
       }`}
@@ -93,8 +93,8 @@ export function SiteHeader() {
 
       {/* drawer mobile */}
       {aberto && (
-        <div className="fixed inset-0 top-16 z-40 bg-white md:hidden">
-          <nav className="flex flex-col gap-1 px-6 py-6">
+        <div className="fixed inset-0 top-16 z-50 overflow-y-auto bg-white md:hidden">
+          <nav className="flex flex-col gap-1 px-6 py-6 pb-12">
             {NAV.map((item) => (
               <Link
                 key={item.href}
