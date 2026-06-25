@@ -54,7 +54,7 @@ export const FUNDADORA = {
     "À frente da Prospere Seguros, Carla Picinini construiu uma trajetória de mais de duas décadas no mercado de seguros, sempre com um princípio simples: tratar cada cliente como parte da família.",
     "Foi essa visão — proteção de verdade, atendimento humano e tecnologia a serviço das pessoas — que deu origem à Prospere: uma corretora digital onde você cota, compara e contrata em minutos, com a segurança de quem entende do assunto há 23 anos.",
   ],
-  fotoUrl: "/brand/carla-picinini.jpg", // substituir pela foto oficial
+  fotoUrl: "/equipe/carla.jpg", // foto oficial da Carla Picinini
 } as const;
 
 // ── Pilares de valor (os 4 do material institucional) ──────────────────────
